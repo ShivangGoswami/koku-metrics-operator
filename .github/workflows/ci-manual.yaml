@@ -61,9 +61,10 @@ jobs:
         run: |
            ibmcloud is instance-create $ZVSI_INS_NAME $ZVSI_VPC_NAME $ZVSI_ZONE $ZVSI_PROFILE_NAME $ZVSI_SUBNET_NAME --keys $ZVSI_SSH_KEY --image $ZVSI_IMAGE_NAME --resource-group-id ${{ secrets.IBMCLOUD_RESOURCE_GROUP_ID }} -q --output JSON | jq 'del(.resource_group)'
            sleep 30
-      - name: floating ip addess creation
+      - name: floating ip addess assignment
         run: |
            ibmcloud is floating-ip-reserve $ZVSI_FIP_NAME --resource-group-id ${{ secrets.IBMCLOUD_RESOURCE_GROUP_ID }} --zone $ZVSI_ZONE -q --output JSON | jq 'del(.resource_group)'
+           ibmcloud is floating-ip-update $ZVSI_FIP_NAME --nic primary --in $ZVSI_INS_NAME -q --output JSON | jq 'del(.resource_group)'
       - name: setup floating ip address for ssh connection
         run: |
            echo "ZVSI_FIP_ADD=$(ibmcloud is floating-ip $ZVSI_FIP_NAME -q --output JSON | jq -r .address)" >> $GITHUB_ENV
@@ -89,9 +90,9 @@ jobs:
                 exit 1
               fi
             done
-      - name: floating ip addess assignment
+      - name: sleep
         run: |
-           ibmcloud is floating-ip-update $ZVSI_FIP_NAME --nic primary --in $ZVSI_INS_NAME -q --output JSON | jq 'del(.resource_group)'
+          sleep 240
       - name: go unit test in zvsi
         uses: appleboy/ssh-action@v1.0.3
         with:
