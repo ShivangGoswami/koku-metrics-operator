@@ -89,9 +89,6 @@ jobs:
                 exit 1
               fi
             done
-      - name: sleep
-        run: |
-          sleep 240
       - name: go unit test in zvsi
         uses: appleboy/ssh-action@v1.0.3
         with:
